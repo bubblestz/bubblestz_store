@@ -1,91 +1,127 @@
-# Next.js
+# Bubblestz Store 🛒
 
-A modern Next.js 15 application built with TypeScript and Tailwind CSS.
+A modern **Vite + React** order management dashboard built with TypeScript, Tailwind CSS, and integrated with Turso database.
+
+![Order Dashboard Screenshot](public/image/logo.png) <!-- Optional: replace with actual screenshot if available -->
 
 ## 🚀 Features
 
-- **Next.js 15** - Latest version with improved performance and features
-- **React 19** - Latest React version with enhanced capabilities
-- **Tailwind CSS** - Utility-first CSS framework for rapid UI development
+- **Order Dashboard** - Real-time KPIs, hourly volume charts, status pie charts, orders grid
+- **Order Details** - Comprehensive view with items table, customer info, status timeline & actions
+- **Order History** - Paginated table of past orders
+- **Settings** - User preferences management
+- **Responsive Design** - Mobile-first with Tailwind CSS & shadcn/ui inspired components
+- **Charts & Visuals** - Recharts for analytics, confetti effects, glassmorphism cards
+- **Notifications** - Sonner toasts with rich colors
+- **Database** - Turso (libSQL) integration with schema & migrations
+- **Modern Stack** - React 19, React Router, Vite (fast HMR), TypeScript
+- **Icons** - Heroicons & Lucide React
+- **Theme** - Dark mode support, custom animations & shadows
 
-## 🛠️ Installation
+## 🛠️ Quick Start
 
-1. Install dependencies:
-  ```bash
-  npm install
-  # or
-  yarn install
-  ```
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-2. Start the development server:
-  ```bash
-  npm run dev
-  # or
-  yarn dev
-  ```
-3. Open [http://localhost:4028](http://localhost:4028) with your browser to see the result.
+2. **Start development server**:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
+
+3. **Optional: Setup Turso DB** (if using real data):
+   - Configure `src/lib/turso.ts` with your database URL & auth token
+   - Run migrations: See `src/lib/migrations.ts`
 
 ## 📁 Project Structure
 
 ```
-nextjs/
-├── public/             # Static assets
+bubblestz_store/
+├── public/                    # Static assets (icons, logo, manifest)
 ├── src/
-│   ├── app/            # App router components
-│   │   ├── layout.tsx  # Root layout component
-│   │   └── page.tsx    # Main page component
-│   ├── components/     # Reusable UI components
-│   ├── styles/         # Global styles and Tailwind configuration
-├── next.config.mjs     # Next.js configuration
-├── package.json        # Project dependencies and scripts
-├── postcss.config.js   # PostCSS configuration
-└── tailwind.config.js  # Tailwind CSS configuration
-
+│   ├── app/                   # Pages & page-specific components
+│   │   ├── order-dashboard/   # Dashboard page (KPIs, charts, orders grid)
+│   │   ├── order-details/     # Order details page
+│   │   ├── order-history/     # History table
+│   │   ├── settings/          # Settings page
+│   │   └── not-found.tsx
+│   ├── components/            # Shared components (AppLayout, Sidebars, UI)
+│   ├── hooks/                 # Custom hooks (useSettings, useNotifications)
+│   ├── lib/                   # Utilities (utils.ts, orders.ts, turso.ts, mockData.ts)
+│   ├── styles/                # Tailwind & global CSS
+│   └── types/
+├── package.json               # Dependencies & scripts
+├── vite.config.ts             # Vite config (port 3000, React plugin)
+├── tailwind.config.js         # Custom theme (DM Sans font, glassmorphism)
+├── tsconfig.json              # TypeScript config
+└── README.md
 ```
 
-## 🧩 Page Editing
+## 🌐 Key Pages
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+| Route | Description |
+|-------|-------------|
+| `/order-dashboard` | Main dashboard with KPIs, charts (hourly volume, status pie), orders grid, confetti |
+| `/order-details` | Single order view: header, items, customer panel, timeline, actions |
+| `/order-history` | All orders table |
+| `/settings` | App settings |
 
-## 🎨 Styling
+## 🛠️ Tech Stack
 
-This project uses Tailwind CSS for styling with the following features:
-- Utility-first approach for rapid development
-- Custom theme configuration
-- Responsive design utilities
-- PostCSS and Autoprefixer integration
+- **Framework**: Vite 8.0 + React 19 + React Router DOM 7
+- **Styling**: Tailwind CSS 3.4 + tailwind-merge + clsx (shadcn/ui pattern)
+- **Charts**: Recharts 2.15
+- **Database**: @libsql/client (Turso), with schema/migrations
+- **UI**: Lucide React, Heroicons, Sonner (toasts), Canvas-confetti
+- **Dev Tools**: ESLint, Prettier, TypeScript 5
 
-## 📦 Available Scripts
+## 📦 NPM Scripts
 
-- `npm run dev` - Start development server on port 4028
-- `npm run build` - Build the application for production
-- `npm run start` - Start the development server
-- `npm run serve` - Start the production server
-- `npm run lint` - Run ESLint to check code quality
-- `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run format` - Format code with Prettier
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start dev server (localhost:3000) |
+| `npm run build` | TypeScript check + Vite build |
+| `npm run preview` | Preview production build |
+| `npm run lint` | ESLint check |
+| `npm run lint:fix` | Auto-fix lint issues |
+| `npm run format` | Prettier format |
+| `npm run type-check` | TypeScript check only |
 
-## 📱 Deployment
+## 🚀 Build & Deployment
 
-Build the application for production:
+1. **Build for production**:
+   ```bash
+   npm run build
+   ```
+   Outputs to `dist/`.
 
-  ```bash
-  npm run build
-  ```
+2. **Preview build**:
+   ```bash
+   npm run preview
+   ```
+
+**Deploy anywhere** (Netlify, Vercel, etc.) - just serve the `dist/` folder. For DB, set Turso env vars.
+
+## 🔧 Customization
+
+- **Tailwind Theme**: Edit `tailwind.config.js` (colors, fonts: DM Sans/JetBrains Mono, animations: pulse-slow/spin-slow)
+- **Components**: `src/components/ui/` (StatusBadge, AppIcon/Image/Logo, NotificationDropdown)
+- **Mock Data**: `src/lib/mockData.ts` - switch to real DB via `turso.ts`
+- **Utils**: `cn()` helper in `src/lib/utils.ts`
 
 ## 📚 Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- [Vite](https://vitejs.dev)
+- [React Router](https://reactrouter.com)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Turso](https://turso.tech)
+- [Recharts](https://recharts.org)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
+Built with ❤️ using modern web technologies.
 
-You can check out the [Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## 🙏 Acknowledgments
+*Project migrated from Rocket.new template*
 
-- Built with [Rocket.new](https://rocket.new)
-- Powered by Next.js and React
-- Styled with Tailwind CSS
-
-Built with ❤️ on Rocket.new
