@@ -1,0 +1,70 @@
+[
+  {
+    "id": "ERR001",
+    "type": "ReferenceError",
+    "file": "src/components/AppLayout.tsx",
+    "line": 97,
+    "message": "Uncaught ReferenceError: Bell is not defined",
+    "status": "Fixed",
+    "description": "The Bell icon from lucide-react was used but not imported. Replaced the manual button with NotificationDropdown which handles the icon correctly."
+  },
+  {
+    "id": "ERR002",
+    "type": "TypeScript",
+    "file": "src/lib/mockData.ts",
+    "message": "Module 'src/lib/mockData.ts' declares 'Order' locally, but it is not exported.",
+    "status": "Fixed",
+    "description": "Exported Order and OrderStatus types from mockData.ts."
+  },
+  {
+    "id": "ERR003",
+    "type": "TypeScript",
+    "file": "src/app/order-dashboard/components/OrderCard.tsx",
+    "line": 30,
+    "message": "Element implicitly has an 'any' type because expression of type 'any' can't be used to index type STATUS_META.",
+    "status": "Fixed",
+    "description": "Fixed by properly exporting and importing Order types. STATUS_META indexing now has correct types."
+  },
+  {
+    "id": "ERR004",
+    "type": "TypeScript",
+    "file": "src/app/order-dashboard/page.tsx",
+    "line": 136,
+    "message": "Type '(orderId: string, newStatus: OrderStatus) => Promise<void>' is not assignable to type '(orderId: number, newStatus: OrderStatus) => void'.",
+    "status": "Fixed",
+    "description": "Changed orderId parameter type from string to number in handleStatusUpdate."
+  },
+  {
+    "id": "ERR005",
+    "type": "TypeScript",
+    "file": "src/lib/turso.ts",
+    "line": 30,
+    "message": "Argument of type 'any[]' is not assignable to parameter of type '[sql: string, args?: InArgs | undefined]'.",
+    "status": "Fixed",
+    "description": "Refactored turso.execute wrapper to avoid Proxy type issues and fixed recursion."
+  },
+  {
+    "id": "ERR006",
+    "type": "Lint",
+    "file": "Root",
+    "message": "ESLint couldn't find an eslint.config.(js|mjs|cjs) file.",
+    "status": "Pending",
+    "description": "The project is using ESLint 9 which expects flat config (eslint.config.js), but it only has .eslintrc.json. The 'lint' script fails."
+  },
+  {
+    "id": "ERR007",
+    "type": "Logic",
+    "file": "src/app/settings/page.tsx",
+    "message": "Settings were not global.",
+    "status": "Fixed",
+    "description": "Settings were stored in local state in the settings page and didn't reflect in the sidebar or other parts of the app until refreshed. Fixed by implementing SettingsProvider context."
+  },
+  {
+    "id": "ERR008",
+    "type": "InternalError",
+    "file": "src/lib/turso.ts",
+    "message": "InternalError: too much recursion",
+    "status": "Fixed",
+    "description": "The Proxy on turso.execute called initDb which in turn called turso.execute before _initialized was set to true, causing infinite recursion. Fixed by setting _initialized = true before calling initDb."
+  }
+]
