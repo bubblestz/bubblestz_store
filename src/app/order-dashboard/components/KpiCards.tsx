@@ -5,7 +5,7 @@ import { formatCurrency } from '@/lib/mockData';
 import {
   ShoppingBag,
   Clock,
-  Waves,
+  Droplets,
   PackageCheck,
   CheckCircle2,
   DollarSign,
@@ -19,14 +19,11 @@ interface KpiCardsProps {
 export default function KpiCards({ orders }: KpiCardsProps) {
   const today = new Date().toDateString();
 
-  const activeCount = orders.filter((o) => o.status !== 'Delivered').length;
+  const activeCount = orders.filter((o) => o.status !== 'Delivered' && o.status !== 'Cancelled').length;
   const pendingCount = orders.filter((o) => o.status === 'Pending').length;
-  const inProcessCount = orders.filter(
-    (o) => o.status === 'Washing' || o.status === 'Drying'
-  ).length;
+  const washingCount = orders.filter((o) => o.status === 'Washing' || o.status === 'Drying').length;
   const readyCount = orders.filter((o) => o.status === 'Ready for Delivery').length;
   
-  // Using created_at as fallback for date check since deliveredAt is gone
   const deliveredToday = orders.filter(
     (o) =>
       o.status === 'Delivered' && o.created_at && new Date(o.created_at).toDateString() === today
@@ -48,7 +45,23 @@ export default function KpiCards({ orders }: KpiCardsProps) {
     return age > 30 * 60 * 1000;
   }).length;
 
-  const cards = [
+  interface KpiCard {
+    label: string;
+    value: string | number;
+    icon: any;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+    span: string;
+    trend?: string;
+    trendUp?: boolean;
+    badge?: string;
+    badgeColor?: string;
+    sub?: string;
+    isLarge?: boolean;
+  }
+
+  const cards: KpiCard[] = [
     {
       label: 'Active Orders',
       value: activeCount,
@@ -61,7 +74,7 @@ export default function KpiCards({ orders }: KpiCardsProps) {
       span: 'col-span-1',
     },
     {
-      label: 'Pending Pickup',
+      label: 'Pending Orders',
       value: pendingCount,
       icon: Clock,
       color: overdueCount > 0 ? 'text-amber-400' : 'text-yellow-400',
@@ -72,13 +85,12 @@ export default function KpiCards({ orders }: KpiCardsProps) {
       span: 'col-span-1',
     },
     {
-      label: 'In Processing',
-      value: inProcessCount,
-      icon: Waves,
-      color: 'text-violet-400',
-      bgColor: 'rgba(139, 92, 246, 0.1)',
-      borderColor: 'rgba(139, 92, 246, 0.2)',
-      sub: 'Washing + Drying',
+      label: 'Processing',
+      value: washingCount,
+      icon: Droplets,
+      color: 'text-blue-400',
+      bgColor: 'rgba(96, 165, 250, 0.1)',
+      borderColor: 'rgba(96, 165, 250, 0.2)',
       span: 'col-span-1',
     },
     {
@@ -88,7 +100,7 @@ export default function KpiCards({ orders }: KpiCardsProps) {
       color: 'text-emerald-400',
       bgColor: 'rgba(110, 231, 183, 0.1)',
       borderColor: 'rgba(110, 231, 183, 0.25)',
-      trend: readyCount > 0 ? 'Needs dispatch' : 'All clear',
+      trend: readyCount > 0 ? 'Awaiting dispatch' : 'All clear',
       trendUp: readyCount === 0,
       span: 'col-span-1',
     },
@@ -119,11 +131,11 @@ export default function KpiCards({ orders }: KpiCardsProps) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-      {cards.map((card, i) => {
+      {cards.map((card) => {
         const Icon = card.icon;
         return (
           <div
-            key={i}
+            key={card.label}
             className={`
               relative overflow-hidden rounded-2xl p-4 fade-in
               ${card.span}

@@ -9,18 +9,19 @@ import {
   User,
   Phone,
   MapPin,
-  Weight,
   Clock,
   Loader2,
   CheckCircle2,
   ArrowRight,
   Eye,
+  ShoppingCart,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface OrderCardProps {
   order: Order;
-  onStatusUpdate: (orderId: number, newStatus: OrderStatus) => void;
+  onStatusUpdate: (orderId: number, newStatus: OrderStatus, appId?: string, userId?: string) => void;
 }
 
 export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
@@ -37,7 +38,7 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
     // Simulate API call delay
     await new Promise((r) => setTimeout(r, 600));
 
-    onStatusUpdate(order.id, nextStatus);
+    onStatusUpdate(order.id, nextStatus, order.app_id, order.user_id);
     toast.success(`Order ${order.id} → ${nextStatus}`, {
       description: `${order.customer_name}'s order has been updated`,
       icon: nextStatus === 'Delivered' ? '🎉' : undefined,
@@ -55,7 +56,7 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
       "
       style={{
         background: 'rgba(10, 16, 35, 0.65)',
-        border: `1px solid ${meta.bgColor.replace('0.15', '0.25')}`,
+        border: `1px solid ${meta?.bgColor?.replace('0.15', '0.25') || 'rgba(255,255,255,0.1)'}`,
         backdropFilter: 'blur(16px)',
         boxShadow: `0 4px 24px rgba(0,0,0,0.3)`,
       }}
@@ -64,7 +65,7 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
       {/* Status accent line */}
       <div
         className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
-        style={{ background: meta.color }}
+        style={{ background: meta?.color || '#94a3b8' }}
       />
 
       {/* Header */}
@@ -94,23 +95,16 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
       </div>
 
       {/* Order metrics */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
+      <div className="grid grid-cols-1 gap-2 mb-3">
         <div
-          className="rounded-xl p-2 text-center"
+          className="rounded-xl p-2 flex items-center justify-between"
           style={{ background: 'rgba(255,255,255,0.03)' }}
         >
-          <div className="flex items-center justify-center gap-1 mb-0.5">
-            <Weight size={10} className="text-slate-500" />
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Weight</p>
+          <div className="flex items-center gap-2">
+            <ShoppingCart size={10} className="text-slate-500" />
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Source</p>
           </div>
-          <p className="text-sm font-bold text-slate-200 tabular">{order.clothes_weight}kg</p>
-        </div>
-        <div
-          className="rounded-xl p-2 text-center"
-          style={{ background: 'rgba(255,255,255,0.03)' }}
-        >
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Blankets</p>
-          <p className="text-sm font-bold text-slate-200 tabular">{order.blanket_count}</p>
+          <p className="text-xs font-bold text-slate-200 tabular">{order.app_id || 'Direct'}</p>
         </div>
       </div>
 
@@ -142,9 +136,9 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
               disabled:opacity-60 disabled:cursor-not-allowed
             `}
             style={{
-              background: meta.bgColor,
-              border: `1px solid ${meta.color}40`,
-              color: meta.color,
+              background: meta?.bgColor || 'rgba(255,255,255,0.05)',
+              border: `1px solid ${meta?.color || '#ffffff'}40`,
+              color: meta?.color || '#ffffff',
             }}
           >
             {isUpdating ? <Loader2 size={12} className="animate-spin" /> : <ArrowRight size={12} />}
@@ -154,6 +148,11 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
           <div className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20">
             <CheckCircle2 size={12} />
             Delivered
+          </div>
+        ) : order.status === 'Cancelled' ? (
+          <div className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+            <X size={12} />
+            Cancelled
           </div>
         ) : null}
 

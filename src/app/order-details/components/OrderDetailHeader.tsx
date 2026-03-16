@@ -10,7 +10,6 @@ import {
   MapPin,
   Calendar,
   User,
-  Weight,
 } from 'lucide-react';
 
 interface OrderDetailHeaderProps {
@@ -68,7 +67,8 @@ export default function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
 
           <div className="flex flex-wrap gap-4 mt-2">
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <span className="font-mono font-semibold text-indigo-400">#{order.id}</span>
+              <span className="text-slate-500">Order ID:</span>
+              <span className="font-mono font-bold text-indigo-400">#{order.id}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
               <Phone size={11} className="text-slate-600" />
@@ -101,13 +101,12 @@ export default function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5 pt-4 border-t border-white/5">
+      <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 mt-5 pt-4 border-t border-white/5">
         {[
-          { label: 'Weight', value: `${order.clothes_weight} kg`, icon: Weight },
-          { label: 'Blankets', value: order.blanket_count.toString() },
           { label: 'App Source', value: order.app_id || 'Direct' },
-        ].map((stat, i) => (
-          <div key={i} className="text-center">
+          { label: 'Platform User', value: order.user_id },
+        ].map((stat) => (
+          <div key={stat.label} className="text-center">
             <p className="text-xs text-slate-500 mb-0.5">{stat.label}</p>
             <p className="text-sm font-semibold text-slate-200 tabular">{stat.value}</p>
           </div>

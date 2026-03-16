@@ -6,7 +6,7 @@ export default function OrderHistoryPage() {
   return (
     <AppLayout
       pageTitle="Order History"
-      pageSubtitle="Complete searchable record of all laundry orders"
+      pageSubtitle="Complete searchable record of all orders"
     >
       <div className="space-y-5">
         {/* Page header */}

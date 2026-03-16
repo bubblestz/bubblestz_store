@@ -8,7 +8,6 @@ import StatusTimeline from './components/StatusTimeline';
 import OrderItemsTable from './components/OrderItemsTable';
 import CustomerInfoPanel from './components/CustomerInfoPanel';
 import StatusActionPanel from './components/StatusActionPanel';
-import ConfettiEffect from '@/app/order-dashboard/components/ConfettiEffect';
 import { Order } from '@/lib/mockData';
 import { OrderStatus } from '@/components/ui/StatusBadge';
 import { FileText, AlertCircle, Loader2 } from 'lucide-react';
@@ -22,7 +21,6 @@ function OrderDetailsContent() {
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [confettiTrigger, setConfettiTrigger] = useState(false);
 
   const refreshOrder = useCallback(async () => {
     if (orderId === null || isNaN(orderId)) {
@@ -37,15 +35,16 @@ function OrderDetailsContent() {
 
   useEffect(() => {
     refreshOrder();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(refreshOrder, 30000);
+    return () => clearInterval(interval);
   }, [refreshOrder]);
 
-  const handleStatusUpdate = useCallback(async (newStatus: OrderStatus) => {
+  const handleStatusUpdate = useCallback(async (newStatus: OrderStatus, appId?: string, userId?: string) => {
     if (orderId === null || isNaN(orderId)) return;
-    const success = await updateOrderStatus(orderId, newStatus);
+    const success = await updateOrderStatus(orderId, newStatus, appId, userId);
     if (success) {
-      if (newStatus === 'Delivered') {
-        setConfettiTrigger(true);
-      }
       toast.success(`Status updated to ${newStatus}`);
       refreshOrder();
     } else {
@@ -90,11 +89,9 @@ function OrderDetailsContent() {
 
   return (
     <AppLayout
-      pageTitle="Order Details"
-      pageSubtitle={`Viewing #${order.id} — ${order.customer_name}`}
+      pageTitle={`Order #${order.id}`}
+      pageSubtitle={`Details for ${order.customer_name}`}
     >
-      <ConfettiEffect trigger={confettiTrigger} onComplete={() => setConfettiTrigger(false)} />
-
       <div className="space-y-5">
         {/* Header */}
         <OrderDetailHeader order={order} />

@@ -1,7 +1,6 @@
 import { turso } from './turso';
 import { ORDERS_TABLE_SCHEMA } from './schema';
 import { MOCK_ORDERS } from './mockData';
-import type { Order } from '@/types';
 
 let initialized = false;
 
@@ -12,18 +11,32 @@ export async function initDb(): Promise<void> {
     // Create table
     await turso.execute(ORDERS_TABLE_SCHEMA);
 
+    // Migration: Update old statuses to new ones if they exist
+    const migrationMap = {
+      'Preparing': 'Washing',
+      'Ready': 'Ready for Delivery',
+      'Out for Delivery': 'Ready for Delivery'
+    };
+
+    for (const [oldStatus, newStatus] of Object.entries(migrationMap)) {
+      await turso.execute({
+        sql: 'UPDATE order_details SET status = ? WHERE status = ?',
+        args: [newStatus, oldStatus],
+      });
+    }
+
     // Seed with mock data if empty
-    const countResult = await turso.execute('SELECT COUNT(*) as count FROM orders');
+    const countResult = await turso.execute('SELECT COUNT(*) as count FROM order_details');
     const count = Number(countResult.rows[0]?.count || 0);
 
     if (count === 0) {
       for (const order of MOCK_ORDERS) {
         await turso.execute({
           sql: `
-            INSERT INTO orders 
+            INSERT INTO order_details 
             (app_id, user_id, customer_name, phone, address, location_lat, location_lng, 
-             clothes_weight, blanket_count, total_cost, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             total_cost, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `,
           args: [
             order.app_id,
@@ -33,8 +46,6 @@ export async function initDb(): Promise<void> {
             order.address,
             order.location_lat,
             order.location_lng,
-            order.clothes_weight,
-            order.blanket_count,
             order.total_cost,
             order.status,
             order.created_at,
@@ -50,4 +61,3 @@ export async function initDb(): Promise<void> {
     throw error;
   }
 }
-

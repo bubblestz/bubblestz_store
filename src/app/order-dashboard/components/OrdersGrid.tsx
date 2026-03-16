@@ -9,7 +9,7 @@ import { RefreshCw, Filter } from 'lucide-react';
 
 interface OrdersGridProps {
   orders?: Order[];
-  onStatusUpdate?: (orderId: number, newStatus: OrderStatus) => void;
+  onStatusUpdate?: (orderId: number, newStatus: OrderStatus, appId?: string, userId?: string) => void;
   onOrdersChange?: (orders: Order[]) => void;
   isLoading?: boolean;
 }
@@ -33,7 +33,7 @@ export default function OrdersGrid({
     activeFilter === 'All' ? orders : orders.filter((o) => o.status === activeFilter);
 
   const handleStatusUpdate = useCallback(
-    (orderId: number, newStatus: OrderStatus) => {
+    (orderId: number, newStatus: OrderStatus, appId?: string, userId?: string) => {
       if (!propOrders) {
         setLocalOrders((prev) => {
           const updated = prev.map((o) => {
@@ -45,7 +45,7 @@ export default function OrdersGrid({
         });
       }
       setLastUpdated(new Date());
-      onStatusUpdate?.(orderId, newStatus);
+      onStatusUpdate?.(orderId, newStatus, appId, userId);
     },
     [onStatusUpdate, onOrdersChange, propOrders]
   );

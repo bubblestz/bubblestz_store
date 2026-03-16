@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Zap, RefreshCw } from 'lucide-react';
+import { Zap, RefreshCw, Database } from 'lucide-react';
 
 interface RealtimeBannerProps {
   lastEventAt?: Date;
+  isLocalMode?: boolean;
 }
 
-export default function RealtimeBanner({ lastEventAt }: RealtimeBannerProps) {
+export default function RealtimeBanner({ lastEventAt, isLocalMode }: RealtimeBannerProps) {
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
@@ -16,6 +17,29 @@ export default function RealtimeBanner({ lastEventAt }: RealtimeBannerProps) {
     const t = setTimeout(() => setPulse(false), 1500);
     return () => clearTimeout(t);
   }, [lastEventAt]);
+
+  if (isLocalMode) {
+    return (
+      <div
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs"
+        style={{
+          background: 'rgba(251, 191, 36, 0.08)',
+          border: '1px solid rgba(251, 191, 36, 0.2)',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-400" />
+          <Database size={11} className="text-amber-400" />
+          <span className="font-semibold text-amber-400 uppercase tracking-wider">Local Persistence Mode</span>
+        </div>
+        <span className="text-slate-600">|</span>
+        <span className="text-slate-400">
+          The database is unreachable. All changes are being saved to <span className="text-amber-300 font-medium">localStorage</span>.
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -40,7 +64,7 @@ export default function RealtimeBanner({ lastEventAt }: RealtimeBannerProps) {
       </div>
       <span className="text-slate-600">|</span>
       <span className="text-slate-400">
-        Channel: <span className="text-slate-300 font-medium">orders</span>
+        Channel: <span className="text-slate-300 font-medium">order_details</span>
       </span>
       <span className="text-slate-600">|</span>
       <span className="text-slate-400">

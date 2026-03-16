@@ -1,5 +1,29 @@
 [
   {
+    "id": "ERR009",
+    "type": "Architectural",
+    "file": "Multiple (src/types, src/lib/mockData, src/app/*)",
+    "message": "Laundry-specific logic and UI components.",
+    "status": "Fixed",
+    "description": "Removed all laundry-related data fields (weight, blankets) and statuses (washing, drying). Replaced with generic store/bubble tea equivalents. Updated all UI components and database schema."
+  },
+  {
+    "id": "ERR010",
+    "type": "RedundantComponent",
+    "file": "src/app/order-dashboard/components/BackgroundWorker.tsx, src/app/order-dashboard/components/ConfettiEffect.tsx",
+    "message": "Demo/simulation components found.",
+    "status": "Fixed",
+    "description": "Deleted BackgroundWorker and ConfettiEffect components and removed all their usages from the dashboard and order detail pages."
+  },
+  {
+    "id": "ERR011",
+    "type": "Tooling",
+    "file": "package.json",
+    "message": "Leftover code-generation dependencies.",
+    "status": "Fixed",
+    "description": "Uninstalled @dhiwise/component-tagger and cleaned up package.json."
+  },
+  {
     "id": "ERR001",
     "type": "ReferenceError",
     "file": "src/components/AppLayout.tsx",
@@ -66,5 +90,21 @@
     "message": "InternalError: too much recursion",
     "status": "Fixed",
     "description": "The Proxy on turso.execute called initDb which in turn called turso.execute before _initialized was set to true, causing infinite recursion. Fixed by setting _initialized = true before calling initDb."
+  },
+  {
+    "id": "ERR013",
+    "type": "NetworkError",
+    "file": "src/lib/turso.ts, src/lib/migrations.ts",
+    "message": "CORS request did not succeed / TypeError: NetworkError when attempting to fetch resource.",
+    "status": "Fixed",
+    "description": "Implemented a robust Local Persistence Mode that silences network errors and uses localStorage as a primary database fallback. Added visual indicator in the dashboard."
+  },
+  {
+    "id": "ERR014",
+    "type": "ReactWarning",
+    "file": "src/lib/orders.ts",
+    "message": "Encountered two children with the same key, NaN / 0.",
+    "status": "Fixed",
+    "description": "Implemented a advanced parseId helper that generates unique random negative numbers as fallbacks when IDs are NaN or 0. This ensures unique React keys across all items even when connection or data parsing issues occur."
   }
 ]

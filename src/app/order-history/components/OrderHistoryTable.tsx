@@ -19,13 +19,12 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Filter,
   Loader2,
   RefreshCw,
 } from 'lucide-react';
 import { getOrders } from '@/lib/orders';
 
-type SortKey = 'id' | 'total_cost' | 'clothes_weight' | 'blanket_count' | 'created_at';
+type SortKey = 'id' | 'total_cost' | 'created_at';
 type SortDir = 'asc' | 'desc';
 
 const ALL_STATUSES: OrderStatus[] = [
@@ -35,6 +34,7 @@ const ALL_STATUSES: OrderStatus[] = [
   'Drying',
   'Ready for Delivery',
   'Delivered',
+  'Cancelled',
 ];
 
 export default function OrderHistoryTable() {
@@ -58,6 +58,10 @@ export default function OrderHistoryTable() {
 
   useEffect(() => {
     refreshOrders();
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(refreshOrders, 30000);
+    return () => clearInterval(interval);
   }, [refreshOrders]);
 
   // Filtering
@@ -86,12 +90,6 @@ export default function OrderHistoryTable() {
       } else if (sortKey === 'total_cost') {
         aVal = a.total_cost;
         bVal = b.total_cost;
-      } else if (sortKey === 'clothes_weight') {
-        aVal = a.clothes_weight;
-        bVal = b.clothes_weight;
-      } else if (sortKey === 'blanket_count') {
-        aVal = a.blanket_count;
-        bVal = b.blanket_count;
       } else if (sortKey === 'created_at') {
         aVal = new Date(a.created_at).getTime();
         bVal = new Date(b.created_at).getTime();
@@ -238,9 +236,9 @@ export default function OrderHistoryTable() {
                       style={
                         active
                           ? {
-                              background: meta.bgColor,
-                              borderColor: meta.color + '60',
-                              color: meta.color,
+                              background: meta?.bgColor || 'rgba(255,255,255,0.05)',
+                              borderColor: meta?.color ? meta.color + '60' : 'rgba(255,255,255,0.1)',
+                              color: meta?.color || '#94a3b8',
                             }
                           : {}
                       }
@@ -302,15 +300,13 @@ export default function OrderHistoryTable() {
               {[
                 { label: 'Order ID', key: 'id' as SortKey, sortable: true },
                 { label: 'Customer', key: null, sortable: false },
-                { label: 'Weight', key: 'clothes_weight' as SortKey, sortable: true },
-                { label: 'Blankets', key: 'blanket_count' as SortKey, sortable: true },
                 { label: 'Total Cost', key: 'total_cost' as SortKey, sortable: true },
                 { label: 'Created At', key: 'created_at' as SortKey, sortable: true },
                 { label: 'Status', key: null, sortable: false },
-                { label: '', key: null, sortable: false },
+                { label: 'Actions', key: null, sortable: false },
               ].map((col, i) => (
                 <th
-                  key={i}
+                  key={col.label || i}
                   className={`
                     px-4 py-3 text-left text-xs font-semibold text-slate-500 tracking-wide whitespace-nowrap
                     ${col.sortable ? 'cursor-pointer hover:text-slate-300 select-none' : ''}
@@ -330,7 +326,7 @@ export default function OrderHistoryTable() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={8} className="px-4 py-24 text-center">
+                <td colSpan={6} className="px-4 py-24 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 size={24} className="animate-spin text-emerald-500" />
                     <p className="text-slate-400 font-medium">Loading orders history...</p>
@@ -339,7 +335,7 @@ export default function OrderHistoryTable() {
               </tr>
             ) : paginated.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-16 text-center">
+                <td colSpan={6} className="px-4 py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center">
                       <Search size={18} className="text-slate-600" />
@@ -381,18 +377,6 @@ export default function OrderHistoryTable() {
                       {order.customer_name}
                     </p>
                     <p className="text-slate-500 text-xs tabular">{order.phone}</p>
-                  </td>
-
-                  {/* Weight */}
-                  <td className="px-4 py-3">
-                    <span className="text-xs font-semibold tabular text-slate-200">
-                      {order.clothes_weight}kg
-                    </span>
-                  </td>
-
-                  {/* Blankets */}
-                  <td className="px-4 py-3">
-                    <span className="text-xs tabular text-slate-300">{order.blanket_count}</span>
                   </td>
 
                   {/* Total Cost */}

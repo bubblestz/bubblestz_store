@@ -4,17 +4,18 @@ import { useState } from 'react';
 import { Order, OrderStatus } from '@/types';
 import { STATUS_META, STATUS_SEQUENCE } from '@/components/ui/StatusBadge';
 import { getNextStatus } from '@/lib/mockData';
-import { ArrowRight, Loader2, CheckCircle2, X } from 'lucide-react';
+import { ArrowRight, Loader2, CheckCircle2, X, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StatusActionPanelProps {
   order: Order;
-  onStatusUpdate: (newStatus: OrderStatus) => void;
+  onStatusUpdate: (newStatus: OrderStatus, appId?: string, userId?: string) => void;
 }
 
 export default function StatusActionPanel({ order, onStatusUpdate }: StatusActionPanelProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeliveryConfirm, setShowDeliveryConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const nextStatus = getNextStatus(order.status);
   const currentMeta = STATUS_META[order.status];
@@ -32,17 +33,20 @@ export default function StatusActionPanel({ order, onStatusUpdate }: StatusActio
   const performUpdate = async (status: OrderStatus) => {
     setIsUpdating(true);
     setShowDeliveryConfirm(false);
+    setShowCancelConfirm(false);
 
     // Simulated delay - real update happens in parent component via onStatusUpdate
     await new Promise((r) => setTimeout(r, 700));
 
-    onStatusUpdate(status);
+    onStatusUpdate(status, order.app_id, order.user_id);
     toast.success(`Status updated to "${status}"`, {
       description: `Order #${order.id} has been advanced`,
-      icon: status === 'Delivered' ? '🎉' : undefined,
+      icon: status === 'Delivered' ? '🎉' : status === 'Cancelled' ? '🚫' : undefined,
     });
     setIsUpdating(false);
   };
+
+  const canCancel = order.status === 'Pending';
 
   return (
     <>
@@ -108,40 +112,58 @@ export default function StatusActionPanel({ order, onStatusUpdate }: StatusActio
         </div>
 
         {/* Next step button */}
-        {nextStatus && nextMeta ? (
-          <button
-            onClick={handleAdvance}
-            disabled={isUpdating}
-            className="
-              w-full flex items-center justify-center gap-2
-              py-3 px-4 rounded-xl font-semibold text-sm
-              transition-all duration-150 active:scale-[0.98]
-              disabled:opacity-60 disabled:cursor-not-allowed
-            "
-            style={{
-              background: nextMeta.bgColor,
-              border: `1px solid ${nextMeta.color}50`,
-              color: nextMeta.color,
-            }}
-          >
-            {isUpdating ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Updating...
-              </>
-            ) : (
-              <>
-                <ArrowRight size={16} />
-                Mark as "{nextStatus}"
-              </>
-            )}
-          </button>
-        ) : (
-          <div className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 font-semibold text-sm">
-            <CheckCircle2 size={16} />
-            Order Fully Delivered
-          </div>
-        )}
+        <div className="space-y-3">
+          {nextStatus && nextMeta && order.status !== 'Cancelled' ? (
+            <button
+              onClick={handleAdvance}
+              disabled={isUpdating}
+              className="
+                w-full flex items-center justify-center gap-2
+                py-3 px-4 rounded-xl font-semibold text-sm
+                transition-all duration-150 active:scale-[0.98]
+                disabled:opacity-60 disabled:cursor-not-allowed
+              "
+              style={{
+                background: nextMeta.bgColor,
+                border: `1px solid ${nextMeta.color}50`,
+                color: nextMeta.color,
+              }}
+            >
+              {isUpdating ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <ArrowRight size={16} />
+                  Mark as "{nextStatus}"
+                </>
+              )}
+            </button>
+          ) : order.status === 'Delivered' ? (
+            <div className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 font-semibold text-sm">
+              <CheckCircle2 size={16} />
+              Order Fully Delivered
+            </div>
+          ) : order.status === 'Cancelled' ? (
+            <div className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-semibold text-sm">
+              <X size={16} />
+              Order Cancelled
+            </div>
+          ) : null}
+
+          {/* Cancel button */}
+          {canCancel && (
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              disabled={isUpdating}
+              className="w-full py-2.5 rounded-xl text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all duration-150 border border-transparent hover:border-red-500/20"
+            >
+              Cancel Order
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Delivery Confirmation Modal */}
@@ -201,6 +223,57 @@ export default function StatusActionPanel({ order, onStatusUpdate }: StatusActio
                   <CheckCircle2 size={14} />
                 )}
                 {isUpdating ? 'Delivering...' : 'Confirm Delivery'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowCancelConfirm(false)}
+          />
+          <div
+            className="relative w-full max-w-sm rounded-2xl p-6 slide-up"
+            style={{
+              background: 'rgba(10, 18, 38, 0.97)',
+              border: '1px solid rgba(248, 113, 113, 0.25)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+            }}
+          >
+            <div className="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/25 flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle size={22} className="text-red-400" />
+            </div>
+
+            <h3 className="text-base font-bold text-slate-100 text-center mb-2">
+              Cancel Order
+            </h3>
+            <p className="text-xs text-slate-400 text-center mb-6">
+              Are you sure you want to cancel order <span className="font-mono text-red-400 font-semibold">#{order.id}</span>? This action cannot be undone.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-400 border border-slate-700 hover:bg-white/5 transition-all duration-150"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => performUpdate('Cancelled')}
+                disabled={isUpdating}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-all duration-150 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {isUpdating ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <X size={14} />
+                )}
+                {isUpdating ? 'Cancelling...' : 'Cancel Order'}
               </button>
             </div>
           </div>

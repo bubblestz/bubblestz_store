@@ -9,11 +9,12 @@ interface StatusPieChartProps {
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   Pending: '#fbbf24',
-  'Picked Up': '#60a5fa',
-  Washing: '#a78bfa',
+  'Picked Up': '#a78bfa',
+  Washing: '#60a5fa',
   Drying: '#fb923c',
   'Ready for Delivery': '#6ee7b7',
   Delivered: '#4ade80',
+  Cancelled: '#f87171',
 };
 
 interface CustomTooltipProps {

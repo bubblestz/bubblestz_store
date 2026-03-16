@@ -1,6 +1,15 @@
 import React from 'react';
-import { Circle, Truck, Waves, Wind, PackageCheck, CheckCircle2 } from 'lucide-react';
-import Icon from '@/components/ui/AppIcon';
+import { 
+  Circle, 
+  Truck, 
+  Package, 
+  PackageCheck, 
+  CheckCircle2, 
+  XCircle, 
+  ShoppingBag, 
+  Wind, 
+  Droplets 
+} from 'lucide-react';
 
 export type OrderStatus =
   | 'Pending'
@@ -8,7 +17,8 @@ export type OrderStatus =
   | 'Washing'
   | 'Drying'
   | 'Ready for Delivery'
-  | 'Delivered';
+  | 'Delivered'
+  | 'Cancelled';
 
 export const STATUS_SEQUENCE: OrderStatus[] = [
   'Pending',
@@ -40,30 +50,30 @@ export const STATUS_META: Record<
   },
   'Picked Up': {
     label: 'Picked Up',
-    className: 'status-picked-up',
-    icon: Truck,
-    color: 'rgb(96, 165, 250)',
-    bgColor: 'rgba(59, 130, 246, 0.15)',
-    dotColor: '#60a5fa',
+    className: 'status-pickedup',
+    icon: ShoppingBag,
+    color: 'rgb(167, 139, 250)',
+    bgColor: 'rgba(139, 92, 246, 0.15)',
+    dotColor: '#a78bfa',
   },
   Washing: {
     label: 'Washing',
     className: 'status-washing',
-    icon: Waves,
-    color: 'rgb(167, 139, 250)',
-    bgColor: 'rgba(139, 92, 246, 0.15)',
-    dotColor: '#a78bfa',
+    icon: Droplets,
+    color: 'rgb(96, 165, 250)',
+    bgColor: 'rgba(59, 130, 246, 0.15)',
+    dotColor: '#60a5fa',
   },
   Drying: {
     label: 'Drying',
     className: 'status-drying',
     icon: Wind,
     color: 'rgb(251, 146, 60)',
-    bgColor: 'rgba(249, 115, 22, 0.15)',
+    bgColor: 'rgba(251, 146, 60, 0.15)',
     dotColor: '#fb923c',
   },
   'Ready for Delivery': {
-    label: 'Ready',
+    label: 'Ready for Delivery',
     className: 'status-ready',
     icon: PackageCheck,
     color: 'rgb(110, 231, 183)',
@@ -78,6 +88,14 @@ export const STATUS_META: Record<
     bgColor: 'rgba(34, 197, 94, 0.15)',
     dotColor: '#4ade80',
   },
+  Cancelled: {
+    label: 'Cancelled',
+    className: 'status-cancelled',
+    icon: XCircle,
+    color: 'rgb(248, 113, 113)',
+    bgColor: 'rgba(239, 68, 68, 0.15)',
+    dotColor: '#f87171',
+  },
 };
 
 interface StatusBadgeProps {
@@ -88,6 +106,7 @@ interface StatusBadgeProps {
 
 export default function StatusBadge({ status, size = 'md', showIcon = true }: StatusBadgeProps) {
   const meta = STATUS_META[status];
+  if (!meta) return null;
   const Icon = meta.icon;
 
   const sizeClasses = {

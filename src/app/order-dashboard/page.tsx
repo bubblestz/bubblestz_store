@@ -6,8 +6,6 @@ import KpiCards from './components/KpiCards';
 import OrdersGrid from './components/OrdersGrid';
 import StatusPieChart from './components/StatusPieChart';
 import HourlyVolumeChart from './components/HourlyVolumeChart';
-import BackgroundWorker from './components/BackgroundWorker';
-import ConfettiEffect from './components/ConfettiEffect';
 import RuntimeBanner from './components/RuntimeBanner';
 import { Order } from '@/lib/mockData';
 import { OrderStatus } from '@/components/ui/StatusBadge';
@@ -18,13 +16,23 @@ import { getOrders, updateOrderStatus } from '@/lib/orders';
 export default function OrdersDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [confettiTrigger, setConfettiTrigger] = useState(false);
+  const [isLocalMode, setIsLocalMode] = useState(false);
   const [lastRealtimeEvent, setLastRealtimeEvent] = useState<Date | undefined>();
 
   const refreshOrders = useCallback(async () => {
     setIsLoading(true);
     const data = await getOrders();
     setOrders(data);
+    
+    // Check if we are in local mode by checking if Turso is unreachable
+    try {
+      const { turso } = await import('@/lib/turso');
+      await turso.execute('SELECT 1');
+      setIsLocalMode(false);
+    } catch (e) {
+      setIsLocalMode(true);
+    }
+
     setIsLoading(false);
     setLastRealtimeEvent(new Date());
   }, []);
@@ -37,18 +45,10 @@ export default function OrdersDashboardPage() {
     return () => clearInterval(interval);
   }, [refreshOrders]);
 
-  const handleStatusUpdate = useCallback(async (orderId: number, newStatus: OrderStatus) => {
-    const success = await updateOrderStatus(orderId, newStatus);
+  const handleStatusUpdate = useCallback(async (orderId: number, newStatus: OrderStatus, appId?: string, userId?: string) => {
+    const success = await updateOrderStatus(orderId, newStatus, appId, userId);
     if (success) {
-      if (newStatus === 'Delivered') {
-        setConfettiTrigger(true);
-        toast.success('🎉 Order Delivered!', {
-          description: `Order ${orderId} has been successfully delivered`,
-          duration: 5000,
-        });
-      } else {
-        toast.success(`Status updated to ${newStatus}`);
-      }
+      toast.success(`Status updated to ${newStatus}`);
       refreshOrders();
     } else {
       toast.error('Failed to update status');
@@ -59,14 +59,10 @@ export default function OrdersDashboardPage() {
     setOrders(updated);
   }, []);
 
-  const handleNewOrdersFound = useCallback((count: number) => {
-    setLastRealtimeEvent(new Date());
-  }, []);
-
   return (
     <AppLayout
       pageTitle="Orders Dashboard"
-      pageSubtitle="Real-time laundry order management"
+      pageSubtitle="Real-time order management"
       headerActions={
         <div className="flex items-center gap-2">
           <button
@@ -95,16 +91,11 @@ export default function OrdersDashboardPage() {
         </div>
       }
     >
-      <ConfettiEffect trigger={confettiTrigger} onComplete={() => setConfettiTrigger(false)} />
-
       <div className="space-y-5">
         {/* Status banners */}
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
-<RuntimeBanner lastEventAt={lastRealtimeEvent} />
-          </div>
-          <div className="flex-1">
-            <BackgroundWorker onNewOrdersFound={handleNewOrdersFound} />
+            <RuntimeBanner lastEventAt={lastRealtimeEvent} isLocalMode={isLocalMode} />
           </div>
         </div>
 

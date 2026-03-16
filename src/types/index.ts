@@ -7,8 +7,6 @@ export interface Order {
   address: string;
   location_lat: number;
   location_lng: number;
-  clothes_weight: number;
-  blanket_count: number;
   total_cost: number;
   status: OrderStatus;
   created_at: string;
@@ -20,4 +18,5 @@ export type OrderStatus =
   | 'Washing'
   | 'Drying'
   | 'Ready for Delivery'
-  | 'Delivered';
+  | 'Delivered'
+  | 'Cancelled';

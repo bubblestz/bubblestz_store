@@ -1,7 +1,7 @@
 'use client';
 
 import { Order, formatCurrency } from '@/lib/mockData';
-import { Weight, Layers, DollarSign } from 'lucide-react';
+import { DollarSign, ShoppingCart } from 'lucide-react';
 
 interface OrderItemsTableProps {
   order: Order;
@@ -20,28 +20,18 @@ export default function OrderItemsTable({ order }: OrderItemsTableProps) {
       <div className="px-5 py-4 border-b border-white/5">
         <h3 className="text-sm font-semibold text-slate-200">Order Summary</h3>
         <p className="text-xs text-slate-500 mt-0.5">
-          Breakdown of laundry metrics and costs
+          Breakdown of order costs
         </p>
       </div>
 
-      <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 transition-all hover:bg-white/10">
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
-            <Weight size={18} className="text-indigo-400" />
+            <ShoppingCart size={18} className="text-indigo-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-medium">Laundry Weight</p>
-            <p className="text-lg font-bold text-slate-100 tabular">{order.clothes_weight} kg</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 transition-all hover:bg-white/10">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-            <Layers size={18} className="text-amber-400" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Blanket Count</p>
-            <p className="text-lg font-bold text-slate-100 tabular">{order.blanket_count}</p>
+            <p className="text-xs text-slate-500 font-medium">Order Source</p>
+            <p className="text-lg font-bold text-slate-100 tabular">{order.app_id || 'Direct'}</p>
           </div>
         </div>
 
@@ -58,7 +48,7 @@ export default function OrderItemsTable({ order }: OrderItemsTableProps) {
       
       <div className="px-5 py-4 bg-white/5 border-t border-white/5">
         <p className="text-xs text-slate-500 italic">
-          * Individual items are not tracked in the current database schema.
+          * Itemized details for this order are currently unavailable.
         </p>
       </div>
     </div>
