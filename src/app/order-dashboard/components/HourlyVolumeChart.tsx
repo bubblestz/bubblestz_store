@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
       >
         <p className="text-slate-400 mb-1.5 font-medium">{label}</p>
         <p className="text-emerald-300 font-semibold tabular">{payload[0]?.value} orders</p>
-        <p className="text-indigo-300 tabular">₱{payload[1]?.value?.toLocaleString()} revenue</p>
+        <p className="text-indigo-300 tabular">TSh {payload[1]?.value?.toLocaleString()} revenue</p>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function HourlyVolumeChart({ orders }: HourlyVolumeChartProps) {
         const h = date.getHours();
         if (h >= 0 && h < 24) {
           hours[h].orders += 1;
-          hours[h].revenue += order.total_cost;
+          hours[h].revenue += order.total_price || 0;
         }
       } catch (e) {
         console.error('Error parsing date for chart', order.created_at);

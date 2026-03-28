@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 
 interface OrderCardProps {
   order: Order;
-  onStatusUpdate: (orderId: number, newStatus: OrderStatus, appId?: string, userId?: string) => void;
+  onStatusUpdate: (orderId: string, newStatus: OrderStatus, appId?: string, userId?: string) => void;
 }
 
 export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
@@ -38,7 +38,7 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
     // Simulate API call delay
     await new Promise((r) => setTimeout(r, 600));
 
-    onStatusUpdate(order.id, nextStatus, order.app_id, order.user_id);
+    onStatusUpdate(order.id, nextStatus, undefined, order.user_id);
     toast.success(`Order ${order.id} → ${nextStatus}`, {
       description: `${order.customer_name}'s order has been updated`,
       icon: nextStatus === 'Delivered' ? '🎉' : undefined,
@@ -94,17 +94,21 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
         </div>
       </div>
 
-      {/* Order metrics */}
-      <div className="grid grid-cols-1 gap-2 mb-3">
+      {/* Laundry Metrics */}
+      <div className="grid grid-cols-2 gap-2 mb-3">
         <div
-          className="rounded-xl p-2 flex items-center justify-between"
+          className="rounded-xl p-2 flex flex-col"
           style={{ background: 'rgba(255,255,255,0.03)' }}
         >
-          <div className="flex items-center gap-2">
-            <ShoppingCart size={10} className="text-slate-500" />
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Source</p>
-          </div>
-          <p className="text-xs font-bold text-slate-200 tabular">{order.app_id || 'Direct'}</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider">Weight</p>
+          <p className="text-xs font-bold text-slate-200 tabular">{order.clothes_weight} kg</p>
+        </div>
+        <div
+          className="rounded-xl p-2 flex flex-col"
+          style={{ background: 'rgba(255,255,255,0.03)' }}
+        >
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider">Blankets</p>
+          <p className="text-xs font-bold text-slate-200 tabular">{order.blankets_count}</p>
         </div>
       </div>
 
@@ -112,7 +116,7 @@ export default function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="text-lg font-bold text-emerald-300 tabular">
-            {formatCurrency(order.total_cost)}
+            {formatCurrency(order.total_price || 0)}
           </p>
         </div>
         <div className="text-right">

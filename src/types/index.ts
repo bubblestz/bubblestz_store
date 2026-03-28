@@ -1,22 +1,25 @@
 export interface Order {
-  id: number;
-  app_id: string;
+  id: string;
   user_id: string;
-  customer_name: string;
-  phone: string;
-  address: string;
-  location_lat: number;
-  location_lng: number;
-  total_cost: number;
+  customer_name: string | null;
+  phone: string | null;
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
+  clothes_weight: number | null;
+  blankets_count: number | null;
+  total_price: number | null;
   status: OrderStatus;
   created_at: string;
 }
 
 export type OrderStatus =
   | 'Pending'
+  | 'Preparing'
+  | 'Ready'
+  | 'Out for Delivery'
+  | 'Delivered'
+  | 'Cancelled'
   | 'Picked Up'
   | 'Washing'
-  | 'Drying'
-  | 'Ready for Delivery'
-  | 'Delivered'
-  | 'Cancelled';
+  | 'Drying';

@@ -1,15 +1,17 @@
 export const ORDERS_TABLE_SCHEMA = `
-  CREATE TABLE IF NOT EXISTS order_details (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    app_id TEXT NOT NULL,
+  CREATE TABLE IF NOT EXISTS Order_details (
+    id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
-    customer_name TEXT NOT NULL,
+    customer_name TEXT,
     phone TEXT,
     address TEXT,
-    location_lat REAL,
-    location_lng REAL,
-    total_cost REAL,
-    status TEXT NOT NULL DEFAULT 'Pending',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    lat REAL,
+    lng REAL,
+    clothes_weight REAL,
+    blankets_count INTEGER,
+    total_price REAL,
+    status TEXT DEFAULT 'Pending',
+    created_at NUMERIC DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_Order_details_user_id_clients_details_id_fk FOREIGN KEY(user_id) REFERENCES clients_details(id)
   )
 `;

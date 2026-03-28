@@ -10,6 +10,8 @@ import {
   MapPin,
   Calendar,
   User,
+  Scale,
+  Layers,
 } from 'lucide-react';
 
 interface OrderDetailHeaderProps {
@@ -93,21 +95,26 @@ export default function OrderDetailHeader({ order }: OrderDetailHeaderProps) {
             border: '1px solid rgba(110, 231, 183, 0.15)',
           }}
         >
-          <p className="text-xs text-slate-500 mb-0.5">Total Cost</p>
+          <p className="text-xs text-slate-500 mb-0.5">Total Price</p>
           <p className="text-2xl font-bold text-emerald-300 tabular">
-            {formatCurrency(order.total_cost)}
+            {formatCurrency(order.total_price || 0)}
           </p>
         </div>
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 mt-5 pt-4 border-t border-white/5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-white/5">
         {[
-          { label: 'App Source', value: order.app_id || 'Direct' },
-          { label: 'Platform User', value: order.user_id },
+          { label: 'Platform User', value: order.user_id, icon: User },
+          { label: 'Weight', value: `${order.clothes_weight} kg`, icon: Scale },
+          { label: 'Blankets', value: order.blankets_count, icon: Layers },
+          { label: 'Source', value: 'Direct', icon: Calendar },
         ].map((stat) => (
-          <div key={stat.label} className="text-center">
-            <p className="text-xs text-slate-500 mb-0.5">{stat.label}</p>
+          <div key={stat.label} className="text-center sm:text-left flex flex-col sm:items-start items-center">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <stat.icon size={11} className="text-slate-600" />
+              <p className="text-xs text-slate-500">{stat.label}</p>
+            </div>
             <p className="text-sm font-semibold text-slate-200 tabular">{stat.value}</p>
           </div>
         ))}

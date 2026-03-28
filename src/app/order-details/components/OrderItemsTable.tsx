@@ -31,7 +31,7 @@ export default function OrderItemsTable({ order }: OrderItemsTableProps) {
           </div>
           <div>
             <p className="text-xs text-slate-500 font-medium">Order Source</p>
-            <p className="text-lg font-bold text-slate-100 tabular">{order.app_id || 'Direct'}</p>
+            <p className="text-lg font-bold text-slate-100 tabular">Direct</p>
           </div>
         </div>
 
@@ -40,8 +40,8 @@ export default function OrderItemsTable({ order }: OrderItemsTableProps) {
             <DollarSign size={18} className="text-emerald-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-medium">Total Cost</p>
-            <p className="text-lg font-bold text-emerald-400 tabular">{formatCurrency(order.total_cost)}</p>
+            <p className="text-xs text-slate-500 font-medium">Total Price</p>
+            <p className="text-lg font-bold text-emerald-400 tabular">{formatCurrency(order.total_price || 0)}</p>
           </div>
         </div>
       </div>

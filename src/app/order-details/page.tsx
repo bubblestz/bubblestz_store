@@ -16,14 +16,13 @@ import { toast } from 'sonner';
 
 function OrderDetailsContent() {
   const [searchParams] = useSearchParams();
-  const orderIdRaw = searchParams.get('id');
-  const orderId = orderIdRaw ? Number(orderIdRaw) : null;
+  const orderId = searchParams.get('id');
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshOrder = useCallback(async () => {
-    if (orderId === null || isNaN(orderId)) {
+    if (!orderId) {
       setIsLoading(false);
       return;
     }
@@ -42,8 +41,8 @@ function OrderDetailsContent() {
   }, [refreshOrder]);
 
   const handleStatusUpdate = useCallback(async (newStatus: OrderStatus, appId?: string, userId?: string) => {
-    if (orderId === null || isNaN(orderId)) return;
-    const success = await updateOrderStatus(orderId, newStatus, appId, userId);
+    if (!orderId) return;
+    const success = await updateOrderStatus(orderId, newStatus, userId);
     if (success) {
       toast.success(`Status updated to ${newStatus}`);
       refreshOrder();
@@ -78,8 +77,8 @@ function OrderDetailsContent() {
           </div>
           <p className="text-slate-300 font-medium mb-1">Order not found</p>
           <p className="text-xs text-slate-500">
-            {orderIdRaw 
-              ? `The order with ID ${orderIdRaw} could not be found.`
+            {orderId 
+              ? `The order with ID ${orderId} could not be found.`
               : 'Please select an order from the dashboard to view details.'}
           </p>
         </div>

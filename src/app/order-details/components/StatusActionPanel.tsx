@@ -38,7 +38,7 @@ export default function StatusActionPanel({ order, onStatusUpdate }: StatusActio
     // Simulated delay - real update happens in parent component via onStatusUpdate
     await new Promise((r) => setTimeout(r, 700));
 
-    onStatusUpdate(status, order.app_id, order.user_id);
+    onStatusUpdate(status, undefined, order.user_id);
     toast.success(`Status updated to "${status}"`, {
       description: `Order #${order.id} has been advanced`,
       icon: status === 'Delivered' ? '🎉' : status === 'Cancelled' ? '🚫' : undefined,

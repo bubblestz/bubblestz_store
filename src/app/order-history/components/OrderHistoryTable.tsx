@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { getOrders } from '@/lib/orders';
 
-type SortKey = 'id' | 'total_cost' | 'created_at';
+type SortKey = 'id' | 'total_price' | 'created_at';
 type SortDir = 'asc' | 'desc';
 
 const ALL_STATUSES: OrderStatus[] = [
@@ -32,7 +32,7 @@ const ALL_STATUSES: OrderStatus[] = [
   'Picked Up',
   'Washing',
   'Drying',
-  'Ready for Delivery',
+  'Ready',
   'Delivered',
   'Cancelled',
 ];
@@ -71,9 +71,9 @@ export default function OrderHistoryTable() {
       const matchesSearch =
         !q ||
         order.id.toString().includes(q) ||
-        order.customer_name.toLowerCase().includes(q) ||
-        order.phone.includes(q) ||
-        order.address.toLowerCase().includes(q);
+        (order.customer_name || '').toLowerCase().includes(q) ||
+        (order.phone || '').includes(q) ||
+        (order.address || '').toLowerCase().includes(q);
       const matchesStatus = statusFilters.length === 0 || statusFilters.includes(order.status);
       return matchesSearch && matchesStatus;
     });
@@ -87,9 +87,9 @@ export default function OrderHistoryTable() {
       if (sortKey === 'id') {
         aVal = a.id;
         bVal = b.id;
-      } else if (sortKey === 'total_cost') {
-        aVal = a.total_cost;
-        bVal = b.total_cost;
+      } else if (sortKey === 'total_price') {
+        aVal = a.total_price || 0;
+        bVal = b.total_price || 0;
       } else if (sortKey === 'created_at') {
         aVal = new Date(a.created_at).getTime();
         bVal = new Date(b.created_at).getTime();
@@ -300,7 +300,7 @@ export default function OrderHistoryTable() {
               {[
                 { label: 'Order ID', key: 'id' as SortKey, sortable: true },
                 { label: 'Customer', key: null, sortable: false },
-                { label: 'Total Cost', key: 'total_cost' as SortKey, sortable: true },
+                { label: 'Total Price', key: 'total_price' as SortKey, sortable: true },
                 { label: 'Created At', key: 'created_at' as SortKey, sortable: true },
                 { label: 'Status', key: null, sortable: false },
                 { label: 'Actions', key: null, sortable: false },
@@ -379,10 +379,10 @@ export default function OrderHistoryTable() {
                     <p className="text-slate-500 text-xs tabular">{order.phone}</p>
                   </td>
 
-                  {/* Total Cost */}
+                  {/* Total Price */}
                   <td className="px-4 py-3">
                     <span className="text-xs font-bold tabular text-emerald-300">
-                      {formatCurrency(order.total_cost)}
+                      {formatCurrency(order.total_price || 0)}
                     </span>
                   </td>
 

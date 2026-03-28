@@ -26,6 +26,8 @@ export default function OrdersDashboardPage() {
     
     // Check if we are in local mode by checking if Turso is unreachable
     try {
+      const { initDb } = await import('@/lib/migrations');
+      await initDb().catch(() => {});
       const { turso } = await import('@/lib/turso');
       await turso.execute('SELECT 1');
       setIsLocalMode(false);
@@ -45,8 +47,8 @@ export default function OrdersDashboardPage() {
     return () => clearInterval(interval);
   }, [refreshOrders]);
 
-  const handleStatusUpdate = useCallback(async (orderId: number, newStatus: OrderStatus, appId?: string, userId?: string) => {
-    const success = await updateOrderStatus(orderId, newStatus, appId, userId);
+  const handleStatusUpdate = useCallback(async (orderId: string, newStatus: OrderStatus, appId?: string, userId?: string) => {
+    const success = await updateOrderStatus(orderId, newStatus, userId);
     if (success) {
       toast.success(`Status updated to ${newStatus}`);
       refreshOrders();

@@ -22,7 +22,7 @@ export default function KpiCards({ orders }: KpiCardsProps) {
   const activeCount = orders.filter((o) => o.status !== 'Delivered' && o.status !== 'Cancelled').length;
   const pendingCount = orders.filter((o) => o.status === 'Pending').length;
   const washingCount = orders.filter((o) => o.status === 'Washing' || o.status === 'Drying').length;
-  const readyCount = orders.filter((o) => o.status === 'Ready for Delivery').length;
+  const readyCount = orders.filter((o) => o.status === 'Ready').length;
   
   const deliveredToday = orders.filter(
     (o) =>
@@ -36,7 +36,7 @@ export default function KpiCards({ orders }: KpiCardsProps) {
         o.created_at &&
         new Date(o.created_at).toDateString() === today
     )
-    .reduce((sum, o) => sum + o.total_cost, 0);
+    .reduce((sum, o) => sum + (o.total_price || 0), 0);
 
   // Overdue = pending for more than 30 minutes
   const overdueCount = orders.filter((o) => {

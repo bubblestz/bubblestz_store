@@ -11,48 +11,14 @@ export async function initDb(): Promise<void> {
     // Create table
     await turso.execute(ORDERS_TABLE_SCHEMA);
 
-    // Migration: Update old statuses to new ones if they exist
-    const migrationMap = {
-      'Preparing': 'Washing',
-      'Ready': 'Ready for Delivery',
-      'Out for Delivery': 'Ready for Delivery'
-    };
-
-    for (const [oldStatus, newStatus] of Object.entries(migrationMap)) {
-      await turso.execute({
-        sql: 'UPDATE order_details SET status = ? WHERE status = ?',
-        args: [newStatus, oldStatus],
-      });
-    }
-
-    // Seed with mock data if empty
-    const countResult = await turso.execute('SELECT COUNT(*) as count FROM order_details');
+    // Check for existing data
+    const countResult = await turso.execute('SELECT COUNT(*) as count FROM Order_details');
     const count = Number(countResult.rows[0]?.count || 0);
-
+    
     if (count === 0) {
-      for (const order of MOCK_ORDERS) {
-        await turso.execute({
-          sql: `
-            INSERT INTO order_details 
-            (app_id, user_id, customer_name, phone, address, location_lat, location_lng, 
-             total_cost, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `,
-          args: [
-            order.app_id,
-            order.user_id,
-            order.customer_name,
-            order.phone,
-            order.address,
-            order.location_lat,
-            order.location_lng,
-            order.total_cost,
-            order.status,
-            order.created_at,
-          ],
-        });
-      }
-      console.log('Database initialized with mock orders');
+      console.log('Database table exists but is empty. No mock data will be seeded.');
+    } else {
+      console.log(`Database connected successfully. Found ${count} orders.`);
     }
 
     initialized = true;

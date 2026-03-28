@@ -12,7 +12,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   'Picked Up': '#a78bfa',
   Washing: '#60a5fa',
   Drying: '#fb923c',
-  'Ready for Delivery': '#6ee7b7',
+  Ready: '#6ee7b7',
   Delivered: '#4ade80',
   Cancelled: '#f87171',
 };

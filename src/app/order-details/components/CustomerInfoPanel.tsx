@@ -55,7 +55,7 @@ export default function CustomerInfoPanel({ order }: CustomerInfoPanelProps) {
         </div>
 
         <a
-          href={`https://www.google.com/maps/search/?api=1&query=${order.location_lat},${order.location_lng}`}
+          href={`https://www.google.com/maps/search/?api=1&query=${order.lat},${order.lng}`}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
@@ -77,8 +77,12 @@ export default function CustomerInfoPanel({ order }: CustomerInfoPanelProps) {
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500">App Source</span>
-            <span className="text-xs font-semibold text-slate-200">{order.app_id || '—'}</span>
+            <span className="text-xs text-slate-500">Weight</span>
+            <span className="text-xs font-semibold text-slate-200">{order.clothes_weight} kg</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-slate-500">Blankets</span>
+            <span className="text-xs font-semibold text-slate-200">{order.blankets_count}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500">User ID</span>

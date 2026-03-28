@@ -7,10 +7,10 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api/turso': {
-        target: 'https://bubbeoders-am3lue.aws-eu-west-1.turso.io',
+      '/api': {
+        target: 'https://bubbleorders-am3lue.aws-eu-west-1.turso.io',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/turso/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

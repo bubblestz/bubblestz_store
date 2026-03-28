@@ -7,25 +7,31 @@ import {
   CheckCircle2, 
   XCircle, 
   ShoppingBag, 
-  Wind, 
-  Droplets 
+  Coffee,
+  CheckCircle,
+  Timer,
+  Droplets,
+  Wind
 } from 'lucide-react';
 
 export type OrderStatus =
   | 'Pending'
+  | 'Preparing'
+  | 'Ready'
+  | 'Out for Delivery'
+  | 'Delivered'
+  | 'Cancelled'
   | 'Picked Up'
   | 'Washing'
-  | 'Drying'
-  | 'Ready for Delivery'
-  | 'Delivered'
-  | 'Cancelled';
+  | 'Drying';
 
 export const STATUS_SEQUENCE: OrderStatus[] = [
   'Pending',
   'Picked Up',
   'Washing',
   'Drying',
-  'Ready for Delivery',
+  'Ready',
+  'Out for Delivery',
   'Delivered',
 ];
 
@@ -72,13 +78,29 @@ export const STATUS_META: Record<
     bgColor: 'rgba(251, 146, 60, 0.15)',
     dotColor: '#fb923c',
   },
-  'Ready for Delivery': {
-    label: 'Ready for Delivery',
+  Preparing: {
+    label: 'Preparing',
+    className: 'status-preparing',
+    icon: Coffee,
+    color: 'rgb(167, 139, 250)',
+    bgColor: 'rgba(139, 92, 246, 0.15)',
+    dotColor: '#a78bfa',
+  },
+  Ready: {
+    label: 'Ready',
     className: 'status-ready',
-    icon: PackageCheck,
+    icon: CheckCircle,
     color: 'rgb(110, 231, 183)',
     bgColor: 'rgba(110, 231, 183, 0.15)',
     dotColor: '#6ee7b7',
+  },
+  'Out for Delivery': {
+    label: 'Out for Delivery',
+    className: 'status-out-for-delivery',
+    icon: Truck,
+    color: 'rgb(251, 146, 60)',
+    bgColor: 'rgba(251, 146, 60, 0.15)',
+    dotColor: '#fb923c',
   },
   Delivered: {
     label: 'Delivered',

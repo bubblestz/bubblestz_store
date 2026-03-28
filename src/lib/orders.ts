@@ -1,7 +1,6 @@
 import { turso } from './turso';
 import { initDb } from './migrations';
 import { Order, OrderStatus } from '@/types';
-import { MOCK_ORDERS } from './mockData';
 
 const LOCAL_STORAGE_KEY = 'bubblestz_orders_cache';
 let isOfflineMode = false;
@@ -9,29 +8,27 @@ let lastRetryTime = 0;
 const RETRY_INTERVAL = 30000; // 30 seconds
 
 /**
- * Robustly parses an ID to a number
+ * Robustly parses an ID to a string
  */
-function parseId(id: any): number {
-  const num = Number(id);
-  return isNaN(num) ? 0 : num;
+function parseId(id: any): string {
+  if (id === null || id === undefined) return '0';
+  return String(id);
 }
 
 /**
- * Gets orders from localStorage, initializing with MOCK_ORDERS if empty
+ * Gets orders from localStorage
  */
 function getLocalOrders(): Order[] {
-  if (typeof window === 'undefined') return MOCK_ORDERS;
+  if (typeof window === 'undefined') return [];
   const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (cached) {
     try {
       return JSON.parse(cached);
     } catch (e) {
-      return MOCK_ORDERS;
+      return [];
     }
   }
-  // Seed initial data if empty
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(MOCK_ORDERS));
-  return MOCK_ORDERS;
+  return [];
 }
 
 /**
@@ -65,21 +62,23 @@ export async function getOrders(): Promise<Order[]> {
   try {
     await initDb().catch(() => {});
     const result = await Promise.race([
-      turso.execute('SELECT * FROM order_details ORDER BY created_at DESC'),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+      turso.execute('SELECT * FROM Order_details ORDER BY created_at DESC'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
     ]) as any;
     
-    if (result.rows && result.rows.length > 0) {
+    if (result.rows) {
+      console.log(`Successfully fetched ${result.rows.length} orders from Turso`);
       const orders = result.rows.map((row: any) => ({
         id: parseId(row.id),
-        app_id: row.app_id || '',
         user_id: row.user_id || '',
         customer_name: row.customer_name || '',
         phone: row.phone || '',
         address: row.address || '',
-        location_lat: Number(row.location_lat) || 0,
-        location_lng: Number(row.location_lng) || 0,
-        total_cost: Number(row.total_cost) || 0,
+        lat: Number(row.lat) || 0,
+        lng: Number(row.lng) || 0,
+        clothes_weight: Number(row.clothes_weight) || 0,
+        blankets_count: Number(row.blankets_count) || 0,
+        total_price: Number(row.total_price) || 0,
         status: (row.status as OrderStatus) || 'Pending',
         created_at: row.created_at || new Date().toISOString(),
       }));
@@ -89,6 +88,7 @@ export async function getOrders(): Promise<Order[]> {
     }
     return localOrders;
   } catch (error) {
+    console.error('Turso fetch error:', error);
     isOfflineMode = true;
     lastRetryTime = Date.now();
     return localOrders;
@@ -96,16 +96,13 @@ export async function getOrders(): Promise<Order[]> {
 }
 
 export async function updateOrderStatus(
-  orderId: number | string,
+  orderId: string,
   status: OrderStatus,
-  app_id?: string,
   user_id?: string
 ): Promise<boolean> {
-  const numericId = Number(orderId);
-  
   // 1. UPDATE LOCALLY IMMEDIATELY
   const local = getLocalOrders();
-  const updated = local.map(o => o.id === numericId ? { ...o, status } : o);
+  const updated = local.map(o => o.id === orderId ? { ...o, status } : o);
   saveLocalOrders(updated);
 
   if (!shouldTryTurso()) {
@@ -115,9 +112,8 @@ export async function updateOrderStatus(
   // 2. TRY SYNCING IN BACKGROUND
   try {
     await initDb().catch(() => {});
-    let query = 'UPDATE order_details SET status = ? WHERE id = ?';
-    const params: any[] = [status, numericId];
-    if (app_id) { query += ' AND app_id = ?'; params.push(app_id); }
+    let query = 'UPDATE Order_details SET status = ? WHERE id = ?';
+    const params: any[] = [status, orderId];
     if (user_id) { query += ' AND user_id = ?'; params.push(user_id); }
 
     await turso.execute({ sql: query, args: params });
@@ -130,28 +126,28 @@ export async function updateOrderStatus(
   }
 }
 
-export async function getOrderById(orderId: number | string): Promise<Order | null> {
-  const id = Number(orderId);
+export async function getOrderById(orderId: string): Promise<Order | null> {
   const local = getLocalOrders();
-  const localMatch = local.find(o => o.id === id);
+  const localMatch = local.find(o => o.id === orderId);
 
   if (!shouldTryTurso()) return localMatch || null;
 
   try {
     await initDb().catch(() => {});
-    const result = await turso.execute({ sql: 'SELECT * FROM order_details WHERE id = ?', args: [id] });
+    const result = await turso.execute({ sql: 'SELECT * FROM Order_details WHERE id = ?', args: [orderId] });
     if (result.rows.length > 0) {
       const row: any = result.rows[0];
       return {
         id: parseId(row.id),
-        app_id: row.app_id || '',
         user_id: row.user_id || '',
         customer_name: row.customer_name || '',
         phone: row.phone || '',
         address: row.address || '',
-        location_lat: Number(row.location_lat) || 0,
-        location_lng: Number(row.location_lng) || 0,
-        total_cost: Number(row.total_cost) || 0,
+        lat: Number(row.lat) || 0,
+        lng: Number(row.lng) || 0,
+        clothes_weight: Number(row.clothes_weight) || 0,
+        blankets_count: Number(row.blankets_count) || 0,
+        total_price: Number(row.total_price) || 0,
         status: row.status as OrderStatus,
         created_at: row.created_at || new Date().toISOString(),
       };
@@ -164,21 +160,21 @@ export async function getOrderById(orderId: number | string): Promise<Order | nu
   }
 }
 
-export async function insertOrder(order: Partial<Order>): Promise<number | null> {
+export async function insertOrder(order: Partial<Order>): Promise<string | null> {
   const local = getLocalOrders();
-  const validIds = local.map(o => Number(o.id)).filter(id => !isNaN(id) && id > 0);
-  const newId = validIds.length > 0 ? Math.max(...validIds) + 1 : 1;
+  const newId = `ORD-${Date.now()}`;
   
   const newOrder: Order = {
     id: newId,
-    app_id: order.app_id || 'DefaultApp',
     user_id: order.user_id || '',
     customer_name: order.customer_name || 'Unknown',
     phone: order.phone || '',
     address: order.address || '',
-    location_lat: order.location_lat || 0,
-    location_lng: order.location_lng || 0,
-    total_cost: order.total_cost || 0,
+    lat: order.lat || 0,
+    lng: order.lng || 0,
+    clothes_weight: order.clothes_weight || 0,
+    blankets_count: order.blankets_count || 0,
+    total_price: order.total_price || 0,
     status: (order.status as OrderStatus) || 'Pending',
     created_at: order.created_at || new Date().toISOString(),
   };
@@ -192,11 +188,12 @@ export async function insertOrder(order: Partial<Order>): Promise<number | null>
   try {
     await initDb().catch(() => {});
     await turso.execute({
-      sql: `INSERT INTO order_details (app_id, user_id, customer_name, phone, address, location_lat, location_lng, total_cost, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO Order_details (id, user_id, customer_name, phone, address, lat, lng, clothes_weight, blankets_count, total_price, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
-        newOrder.app_id, newOrder.user_id, newOrder.customer_name, newOrder.phone,
-        newOrder.address, newOrder.location_lat, newOrder.location_lng,
-        newOrder.total_cost, newOrder.status, newOrder.created_at
+        newOrder.id, newOrder.user_id, newOrder.customer_name, newOrder.phone,
+        newOrder.address, newOrder.lat, newOrder.lng,
+        newOrder.clothes_weight, newOrder.blankets_count,
+        newOrder.total_price, newOrder.status, newOrder.created_at
       ]
     });
     isOfflineMode = false;
